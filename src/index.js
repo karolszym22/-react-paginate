@@ -2,27 +2,25 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import ReactPaginate from 'react-paginate';
 
-const items = [...Array(333).keys()];
 
-function Items({ currentItems }) {
-  return (
-    <div className="items">
-    {currentItems && currentItems.map((item) => (
-      <div>
-        <h3>Item #{item}</h3>
-      </div>
-    ))}
-      </div>
-  );
-}
 
 function PaginatedItems({ itemsPerPage }) {
-  // We start with an empty list of items.
+
+  
   const [currentItems, setCurrentItems] = useState(null);
   const [pageCount, setPageCount] = useState(0);
-  // Here we use item offsets; we could also use page offsets
-  // following the API or data you're working with.
   const [itemOffset, setItemOffset] = useState(0);
+  const [itemNumber, setItemNumber] = useState(0);
+
+    useEffect(() => {
+        const fetchBooks= async () => {
+            const response = await fetch('https://gnikdroy.pythonanywhere.com/api/book/');
+            const data = await response.json();
+            setItemNumber(data.count);
+          
+        }
+        fetchBooks();
+    },[itemNumber]);
 
   useEffect(() => {
     // Fetch items from another resources.
@@ -32,6 +30,20 @@ function PaginatedItems({ itemsPerPage }) {
     setPageCount(Math.ceil(items.length / itemsPerPage));
   }, [itemOffset, itemsPerPage]);
 
+  
+  const items = [...Array(itemNumber).keys()];
+
+  function Items({ currentItems }) {
+    return (
+      <div className="items">
+      {currentItems && currentItems.map((item) => (
+        <div>
+          <h3>Item #{item}</h3>
+        </div>
+      ))}
+        </div>
+    );
+  }
   // Invoke when user click to request another page.
   const handlePageClick = (event) => {
     const newOffset = event.selected * itemsPerPage % items.length;
@@ -41,7 +53,8 @@ function PaginatedItems({ itemsPerPage }) {
 
   return (
     <>
-      <Items currentItems={currentItems} />
+      <Items currentItems={currentItems}  />
+      {console.log(itemNumber)}
       <ReactPaginate
         nextLabel="next >"
         onPageChange={handlePageClick}
@@ -68,6 +81,6 @@ function PaginatedItems({ itemsPerPage }) {
 
 // Add a <div id="container"> to your HTML to see the componend rendered.
 ReactDOM.render(
-  <PaginatedItems itemsPerPage={10} />,
+  <PaginatedItems itemsPerPage={2} />,
   document.getElementById("root")
 );
